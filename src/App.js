@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import Loader from "./components/Loader/Loader";
 import { covidAPI } from "./api/api";
@@ -6,45 +6,61 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "./components/Dropdown/Dropdown";
 import Cards from "./components/Cards/Cards";
 
-class App extends React.Component {
-  state = {
-    countries: [],
-    covidData: [],
-    currentCountry: "",
+const App = () => {
+  const [countries, setCountries] = useState([]);
+  const [covidData, setCovidData] = useState([]);
+  const [currentCountry, setCurrentCountry] = useState("");
+  const [currentlyConfirmed, setCurrentlyConfirmed] = useState([]);
+  const [currentlyDeaths, setCurrentlyDeaths] = useState([]);
+  const [currentlyRecovered, setCurrentlyRecovered] = useState([]);
+  const [lastChecked, setLastChecked] = useState(null);
+
+  useEffect(() => {
+    const foo = async () => {
+      const { data: countries } = await covidAPI.getCountries();
+      setCountries(countries);
+      setCurrentCountry(countries[0].Slug);
+    };
+    foo();
+  }, []);
+
+  useEffect(() => {
+    const foo = async () => {
+      const { data } = await covidAPI.getCountryData(currentCountry);
+      const { Confirmed, Deaths, Recovered, Date } = data[data.length - 1];
+      debugger;
+      setCurrentlyConfirmed(Confirmed);
+      setCurrentlyDeaths(Deaths);
+      setCurrentlyRecovered(Recovered);
+      setLastChecked(Date);
+      setCovidData(data);
+    };
+    if (currentCountry.length) foo();
+  }, [currentCountry]);
+
+  const onSelect = ({ Country, Slug, ISO2 }) => {
+    setCurrentCountry(Slug);
   };
 
-  async componentDidMount() {
-    const { data: countries } = await covidAPI.getCountries();
-
-    return this.setState({
-      countries,
-      currentCountry: countries[0].Slug,
-    });
-  }
-
-  onSelect = ({ Country, Slug, ISO2 }) => {
-    this.setState({
-      currentCountry: Slug,
-    });
-  };
-
-  render() {
-    return (
-      <div className="container">
-        {!this.state.countries.length ? (
-          <Loader />
-        ) : (
-          <>
-            <Dropdown
-              countries={this.state.countries}
-              onSelect={this.onSelect}
+  return (
+    <div className="container">
+      {!countries.length ? (
+        <Loader />
+      ) : (
+        <>
+          <Dropdown countries={countries} onSelect={onSelect} />
+          {covidData.length ? (
+            <Cards
+              currentlyConfirmed={currentlyConfirmed}
+              currentlyDeaths={currentlyDeaths}
+              currentlyRecovered={currentlyRecovered}
+              lastChecked={lastChecked}
             />
-            <Cards />
-          </>
-        )}
-      </div>
-    );
-  }
-}
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+};
 
 export default App;

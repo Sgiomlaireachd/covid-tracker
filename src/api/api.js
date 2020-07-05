@@ -9,4 +9,9 @@ export const covidAPI = {
     const response = await axiosInstance.get("countries");
     return response;
   },
+
+  getCountryData: async (country) => {
+    const response = await axiosInstance.get(`country/${country}`);
+    return response;
+  },
 };
