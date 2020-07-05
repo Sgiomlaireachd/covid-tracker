@@ -1,0 +1,11 @@
+.card.confirmed {
+  border-bottom: 5px solid rgba(0, 0, 255, 0.5);
+}
+
+.card.deaths {
+  border-bottom: 5px solid rgba(255, 0, 0, 0.5);
+}
+
+.card.recovered {
+  border-bottom: 5px solid rgba(0, 255, 0, 0.5);
+}
